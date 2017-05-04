@@ -1,7 +1,7 @@
 (function() {
     const predefined = {
-        rows: ['brand'],
-        cols: ['year'],
+        rows: ['brand', 'type', 'model'],
+        cols: ['year', 'department'],
         calcMethod: ''
     };
 
