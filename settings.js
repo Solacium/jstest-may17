@@ -1,8 +1,8 @@
 (function() {
     const predefined = {
-        rows: ['brand', 'type', 'model'],
-        cols: ['year', 'department'],
-        calcMethod: ''
+        rows: ['brand', 'model', 'type'],
+        cols: ['department', 'year'],
+        calcMethod: 'count'
     };
 
     const settings = {
@@ -13,7 +13,7 @@
             return _.clone(predefined.cols);
         },
         getCalcMethod: function() {
-            return _.clone(predefined.calcMethod);
+            return predefined.calcMethod;
         }
     };
 

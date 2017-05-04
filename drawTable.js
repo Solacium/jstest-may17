@@ -2,8 +2,7 @@
 
     const predefined = {
         rows: null,
-        cols: null,
-        calcMethod: null
+        cols: null
     };
 
     const elems = {
@@ -12,6 +11,31 @@
     };
 
     const tableFrame = [];
+
+    function getCellValue(trNumber, tdNumber, dataTree) {
+        const labelsInDataTree = [];
+        let dataSource = dataTree;
+        let cellUnitsCollection;
+        let i;
+        for (i = 1; i <= predefined.rows.length; i++) {
+            let label = tableFrame[i][tdNumber].innerText;
+            labelsInDataTree.unshift(label);
+        }
+        for (i = 1; i <= predefined.cols.length; i++) {
+            let label = tableFrame[trNumber][i].innerText;
+            labelsInDataTree.unshift(label);
+        }
+        do {
+            let nextLabel = labelsInDataTree.pop();
+            if (!dataSource.hasOwnProperty(nextLabel)) {
+                cellUnitsCollection = [];
+                break;
+            }
+            dataSource = cellUnitsCollection = dataSource[nextLabel];
+        } while (labelsInDataTree.length > 0);
+
+        return getCollectionValue(cellUnitsCollection);
+    }
 
     function newCell(parameters) {
         const cell = document.createElement('td');
@@ -39,9 +63,6 @@
                 }
 
             }
-            if (parameters.hasOwnProperty('aClass')) {
-                cell.className = parameters.aClass;
-            }
         }
         return cell;
     }
@@ -49,7 +70,6 @@
     function getSettints() {
         predefined.rows = settings.getRows();
         predefined.cols = settings.getCols();
-        predefined.calcMethod = settings.getCalcMethod();
     }
 
     function initElems() {
@@ -118,42 +138,45 @@
     }
 
     function drawBody(dataFormatted) {
-        const rowRemained = dataFormatted.cols._endPoints;
-        const lastRowNumber = elems.table.rows.length-1;
-
-        function drawRow(dataCols, lastRowNumber, currentColNr, currentRow, leftOffset) {
-            const row = currentRow ? currentRow : document.createElement('tr');
-            leftOffset = leftOffset ? leftOffset : 0;
-
-            if (!Array.isArray(dataCols)) {
-                for (let label in dataCols) {
-                    if (!dataCols.hasOwnProperty(label) || label === '_endPoints') {continue;}
-                    row.appendChild(newCell({
-                        innerHTML: label,
-                        trNumber: lastRowNumber+2,
-                        tdNumber: leftOffset + elems.table.rows[lastRowNumber].length ? elems.table.rows[lastRowNumber].length+1 : 1,
-                        colSpan: (currentColNr === predefined.cols.length+1) ? 2 : 1,
-                        rowSpan: dataCols[label]._endPoints ? dataCols[label]._endPoints : 1
-                    }));
-                    if (dataCols[label]._endPoints) {
-                        drawRow(dataCols[label], lastRowNumber, currentColNr+1, null, dataCols[label]._endPoints);
-                    } else {
-                        drawRow(dataCols[label], lastRowNumber, currentColNr+1, row);
-                    }
-                }
-                for (let i = 0; i < dataFormatted.rows._endPoints; i++) {
-                    row.appendChild(newCell({
-                        innerHTML: '-',
-                        trNumber: lastRowNumber+2,
-                        tdNumber: leftOffset + predefined.cols.length+1+i,
-                        aClass: 'dataCells'
-                    }));
-                }
-                elems.table.appendChild(row);
+        (function predrawRows(quantity) {
+            while (quantity--) {
+                elems.table.appendChild(document.createElement('tr'));
             }
-        }
+        })(dataFormatted.cols._endPoints);
 
-        drawRow(dataFormatted.cols, lastRowNumber, 1);
+        (function drawLeftHeaders(dataCols, colIndex, initialRowIndex, lastColIndex) {
+            if (Array.isArray(dataCols)) {
+                return;
+            }
+            let currentRowIndex = initialRowIndex;
+            for (let label in dataCols) {
+                if (!dataCols.hasOwnProperty(label) || label === '_endPoints') {continue;}
+                elems.table.rows[currentRowIndex].appendChild(newCell({
+                    innerHTML: label,
+                    trNumber: currentRowIndex+1,
+                    tdNumber: colIndex+1,
+                    colSpan: (colIndex === lastColIndex-1) ? 2 : 1 ,
+                    rowSpan: dataCols[label]._endPoints
+                }));
+                if (dataCols[label]._endPoints) {
+                    drawLeftHeaders(dataCols[label], colIndex+1, currentRowIndex, lastColIndex);
+                    currentRowIndex += dataCols[label]._endPoints;
+                } else {
+                    (function drawContentCells(){
+                        for (let i = 1; i <= dataFormatted.rows._endPoints; i++) {
+                            const trNumber = currentRowIndex+1;
+                            const tdNumber = colIndex+2+i;
+                            elems.table.rows[currentRowIndex].appendChild(newCell({
+                                innerHTML: getCellValue(trNumber, tdNumber, dataFormatted.all),
+                                trNumber: trNumber,
+                                tdNumber: tdNumber
+                            }));
+                        }
+                    })();
+                    currentRowIndex++;
+                }
+            }
+        })(dataFormatted.cols, 0, predefined.rows.length+1, predefined.cols.length);
     }
 
     function drawTable(dataFormatted) {
