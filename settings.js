@@ -1,7 +1,10 @@
 (function() {
     const predefined = {
-        rows: ['brand', 'model', 'type'],
-        cols: ['department', 'year'],
+        // values accepted: 'brand', 'model', 'type', 'year', 'department'
+        rows: ['brand', 'department'],
+        // values accepted: 'brand', 'model', 'type', 'year', 'department'
+        cols: ['model', 'type', 'year'],
+        // values accepted: 'sum', 'avg', 'count'
         calcMethod: 'count'
     };
 
