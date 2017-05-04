@@ -20,7 +20,7 @@
         return average;
     }
 
-    function getCollectionValue(unitsCollection) {
+    function _getCollectionValue(unitsCollection) {
         switch (settings.getCalcMethod()) {
             case 'count':
                 return getCountValue(unitsCollection);
@@ -33,7 +33,7 @@
     }
 
     window.getCollectionValue = function(unitsCollection) {
-        const collectionValue = getCollectionValue(unitsCollection);
+        const collectionValue = _getCollectionValue(unitsCollection);
         return (settings.isZeroHidden() && collectionValue === 0 ? '' : collectionValue);
     };
 })();
