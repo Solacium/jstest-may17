@@ -32,5 +32,8 @@
         }
     }
 
-    window.getCollectionValue = getCollectionValue;
+    window.getCollectionValue = function(unitsCollection) {
+        const collectionValue = getCollectionValue(unitsCollection);
+        return (settings.isZeroHidden() && collectionValue === 0 ? '' : collectionValue);
+    };
 })();

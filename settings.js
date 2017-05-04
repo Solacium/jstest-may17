@@ -5,7 +5,9 @@
         // values accepted: 'brand', 'model', 'type', 'year', 'department'
         cols: ['model', 'type', 'year'],
         // values accepted: 'sum', 'avg', 'count'
-        calcMethod: 'count'
+        calcMethod: 'count',
+        // values accepted: true, false
+        hideZero: true
     };
 
     const settings = {
@@ -17,6 +19,9 @@
         },
         getCalcMethod: function() {
             return predefined.calcMethod;
+        },
+        isZeroHidden: function() {
+            return predefined.hideZero;
         }
     };
 
